@@ -14,6 +14,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect (process, SIGNAL(readyReadStandardError()), this, SLOT(onReadyReadStandardError()));
     connect (process, SIGNAL(started()), this, SLOT(onStarted()));
     connect (process, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(onFinished()));
+    kill = false;
 }
 
 void MainWindow::on_start_clicked()
@@ -23,7 +24,13 @@ void MainWindow::on_start_clicked()
 
 void MainWindow::on_stop_clicked()
 {
-    process->terminate();
+    if (!kill) {
+        process->terminate();
+        kill = true;
+        ui->stop->setText("Kill");
+    } else {
+        process->kill();
+    }
 }
 
 void MainWindow::onStarted()
@@ -39,6 +46,8 @@ void MainWindow::onFinished()
     ui->progress->setMaximum(100);
     ui->start->setDisabled(false);
     ui->stop->setDisabled(true);
+    kill = false;
+    ui->stop->setText("Stop");
 }
 
 void MainWindow::onReadyReadStandardOutput()
